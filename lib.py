@@ -1,6 +1,6 @@
 import os 
 import os.path as osp
-
+import matplotlib.pyplot as plt
 import random
 import xml.etree.cElementTree as ET
 import cv2
