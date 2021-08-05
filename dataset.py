@@ -14,7 +14,7 @@ class MyDataset(data.Dataset):
     def __len__(self):
         return len(self.img_list)
 
-    def __getitem__(self, imdex):
+    def __getitem__(self, index):
         img, gt, height, width = self.pull_item(index)
 
         return img , gt
@@ -34,6 +34,18 @@ class MyDataset(data.Dataset):
         gt = np.hstack((boxes, np.expand_dims(label, axis = 1)))
         return img, gt, height, width 
 
+def my_collate_fn(batch):
+    target = []
+    imgs = []
+
+    for sample in batch:
+        imgs.append(sample[0])
+        target.append(torch.FloatTensor(sample[1]))
+
+    imgs = torch.stack(imgs, dim = 0)
+
+    return imgs, target
+
 
 if __name__ == "__main__":
     root_path = "./data/VOC2012/"
@@ -46,4 +58,20 @@ if __name__ == "__main__":
     input_size = 300
 
     train_dataset = MyDataset(train_img_list, train_annotation_list, phase="train", transform=DataTransform(input_size, color_mean), anno_xml=Anno_xml(classes))
-    print(len(train_dataset))
+    # print(len(train_dataset))
+    val_dataset = MyDataset(val_img_list, val_annotation_list, phase="val", transform=DataTransform(input_size, color_mean), anno_xml=Anno_xml(classes))
+
+    batch_size = 4 
+    train_dataloader  = data.DataLoader(train_dataset, batch_size=batch_size, shuffle = True, collate_fn = my_collate_fn)
+    val_dataloader = data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn = my_collate_fn)
+
+    dataloader_dict = {
+        "train":train_dataloader,
+        "val": val_dataloader
+    }
+
+    batch_iter = iter(dataloader_dict["val"])
+    images, targets = next(batch_iter)
+    print(images.size())
+    print(len(targets))
+
