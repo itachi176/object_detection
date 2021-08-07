@@ -45,7 +45,7 @@ class DefaultBox():
         output.clamp_(max = 1, min = 0)
         return output
 
-if __name__ == "__main__":
-    default = DefaultBox(cfg)
-    boxes = default.create_defbox()
-    print(boxes[0])
+# if __name__ == "__main__":
+#     default = DefaultBox(cfg)
+#     boxes = default.create_defbox()
+#     print(boxes[0])

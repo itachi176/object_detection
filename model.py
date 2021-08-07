@@ -1,5 +1,6 @@
 from lib import *
-
+from L2_norm import * 
+from default_box import DefaultBox
 def create_vgg():
     layers = []
     in_channels = 3
@@ -69,12 +70,41 @@ def create_loc_conf(num_classes = 21, box_ratio_num = [4,6,6,6,4,4]):
     conf_layers += [nn.Conv2d(256, box_ratio_num[5]*num_classes, kernel_size = 3, padding = 1)]
 
     return nn.ModuleList(loc_layers), nn.ModuleList(conf_layers)
-if __name__ == "__main__":
-    vgg = create_vgg()
-    print(vgg)
-    extras = extras()
-    print(extras)
 
-    loc, conf = create_loc_conf()
-    print(loc)
-    print(conf)
+cfg = {
+    "num_classes":21,
+    "input_size": 300, 
+    "bbox_aspect_num": [4,6,6,6,4,4], # ti le khung hinh 
+    "feature_maps": [38, 19, 10, 5, 3, 1],
+    "steps": [8, 16, 32, 64, 100, 300], #size of default box 
+    "min_size":[30, 50, 11, 162, 213, 264],
+    "max_size":[50, 11, 162, 213, 264, 315],
+    "aspect_ratios":[[2], [2, 3], [2,3], [2,3], [2], [2]]
+
+}
+
+class SSD(nn.Module):
+    def __init__(self,phase, cfg):
+        super(SSD, self).__init__()
+        self.phase = phase
+        #dinh nghia cac ham 
+        self.vgg = create_vgg()
+        self.L2Norm = L2Norm()
+        self.extras = extras()
+        self.loc_layers, self.conf_layers = create_loc_conf(cfg["num_classes"], cfg["bbox_aspect_num"])
+        default = DefaultBox(cfg)
+        self.default_box = default.create_defbox()
+        if phase == "inference":
+            self.detect = Detect()
+
+if __name__ == "__main__":
+    # vgg = create_vgg()
+    # print(vgg)
+    # extras = extras()
+    # print(extras)
+
+    # loc, conf = create_loc_conf()
+    # print(loc)
+    # print(conf)
+    ssd = SSD("train", cfg)
+    print(ssd)

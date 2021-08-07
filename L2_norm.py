@@ -9,7 +9,7 @@ class L2Norm(nn.Module):
         self.eps = 1e-10
 
     def reset_parameter(self):
-        init.constant_(self.weight, self.scale)
+        nn.init.constant_(self.weight, self.scale)
 
     def forward(self, x):
         norm = x.pow(2).sum(dim=1, keepdim=True).sqrt() + self.eps
