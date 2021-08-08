@@ -97,6 +97,12 @@ class SSD(nn.Module):
         if phase == "inference":
             self.detect = Detect()
 
+def decode(loc, def_box):
+    boxes = torch.cat((def_box[:, :2] + def_box[:,:2]*loc[:,:2]*0.1, def_box[:,2:]*torch.exp(0.2*loc[:, 2:])), dim = 1)
+
+    boxes[:, :2] = boxes[:, :2] - boxes[:, 2:]
+    boxes[:, 2:] = boxes[:, :2] + boxes[:, 2:]
+    return boxes
 if __name__ == "__main__":
     # vgg = create_vgg()
     # print(vgg)
