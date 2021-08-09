@@ -103,6 +103,62 @@ def decode(loc, def_box):
     boxes[:, :2] = boxes[:, :2] - boxes[:, 2:]
     boxes[:, 2:] = boxes[:, :2] + boxes[:, 2:]
     return boxes
+
+def nms(boxes, scores, IoU_thress = 0.45, top_k = 200):
+    count = 0
+    keep = scores.new(scores.size(0)).zero_().long()
+    x1 = boxes[:, 0]
+    y1 = boxes[:, 1]
+    x2 = boxes[:, 2]
+    y2 = boxes[:, 3]
+
+    area = torch.mul(x2-x1, y2-y1)
+
+    temp_x1 = boxes.new()
+    temp_y1 = boxes.new()
+    temp_x2 = boxes.new()
+    temp_y2 = boxes.new()
+    temp_w = boxes.new()
+    temp_h = boxes.new()
+
+    val, index = scores.sort(0)
+    index = index[-top_k:]
+
+    while(index.numel() > 0):
+        i = index[-1]
+        keep[count] = i 
+        count += 1
+
+        if index.size() == 1:
+            break
+        index = index[:-1]
+        #lay ra cac box 
+        torch.index_select(x1, 0, index, out=temp_x1)
+        torch.index_select(y1, 0, index, out=temp_y1)
+        torch.index_select(x2, 0, index, out=temp_x2)
+        torch.index_select(y2, 0, index, out=temp_y2)
+
+        temp_x1 = torch.clamp(temp_x1, min = x1[i])
+        temp_y1 = torch.clamp(temp_y1, min = y1[i])
+        temp_x2 = torch.clamp(temp_x2, max = x2[i])
+        temp_y2 = torch.clamp(temp_x1, max = y2[i])
+
+        temp_w.resize_as_(temp_x2)
+        temp_h.resize_as_(temp_y2)
+
+        temp_w = temp_x2 - temp_x1
+        temp_h = temp_y2 - temp_y1
+
+        temp_w = torch.clamp(temp_w, min = 0.0)
+        temp_h = torch.clamp(temp_h, min = 0.0)
+        #overlap area 
+        inter = temp_h * temp_w
+
+        orther_box = torch.index_select(area, 0, index)
+        union = orther_box + area[i]-inter
+        IoU = inter/union
+        idx = idx[IoU.le(union)]
+    return keep, count
 if __name__ == "__main__":
     # vgg = create_vgg()
     # print(vgg)

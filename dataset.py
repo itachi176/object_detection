@@ -47,6 +47,7 @@ def my_collate_fn(batch):
     return imgs, target
 
 
+
 if __name__ == "__main__":
     root_path = "./data/VOC2012/"
     classes =["aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car",\
