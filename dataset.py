@@ -1,4 +1,4 @@
-from extract_inform_annovation import Anno_xml
+from extract_inform_annotation import Anno_xml
 from transform import DataTransform
 from lib import * 
 from make_datapath import make_datapath_list

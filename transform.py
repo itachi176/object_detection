@@ -1,4 +1,4 @@
-from extract_inform_annovation import Anno_xml
+from extract_inform_annotation import Anno_xml
 from utils.augumentation import Compose, ConvertFromInts, ToAbsoluteCoords, PhotometricDistort, \
     Expand, RandomSampleCrop, RandomMirror, \
     ToPercentCoords, Resize, SubtractMeans
